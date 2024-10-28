@@ -36,6 +36,8 @@ public:
    // getters
    double getMetersX()       const { return x;                    }
    double getMetersY()       const { return y;                    }
+   double getDX()            const { return dx;                   }
+   double getDY()            const { return dy;                   }
    double getPixelsX()       const { return x / metersFromPixels; }
    double getPixelsY()       const { return y / metersFromPixels; }
 
@@ -43,6 +45,8 @@ public:
    void setMeters(double xMeters, double yMeters) {x = xMeters; y = yMeters; }
    void setMetersX(double xMeters)       { x = xMeters;           }
    void setMetersY(double yMeters)       { y = yMeters;           }
+   void setDX(double dx)                 { this->dx = dx;         }
+   void setDY(double dy)                 { this->dy = dy;         }
    void setPixelsX(double xPixels)       { x = xPixels * metersFromPixels;          }
    void setPixelsY(double yPixels)       { y = yPixels * metersFromPixels;          }
    void addMetersX(double dxMeters)      { setMetersX(getMetersX() + dxMeters);     }
@@ -60,6 +64,8 @@ public:
 private:
    double x;                 // horizontal position
    double y;                 // vertical position
+   double dx;                // change in x
+   double dy;                // change in y
    static double metersFromPixels;
 };
 
