@@ -21,7 +21,7 @@ using namespace std;
 
 #define PI           3.14159265358979
 #define RADIUS_EARTH 6378000.0        // m
-#define GRAVITY_SEA  -9.80665         // m/s^2
+#define GRAVITY_SEA  9.80665         // m/s^2
 #define ORBITAL_VEL  3100             // m/s
 
 /**
@@ -29,7 +29,7 @@ using namespace std;
  */
 double gravityAtHeight(double h)
 {
-   return GRAVITY_SEA * (RADIUS_EARTH / RADIUS_EARTH + h) * (RADIUS_EARTH / RADIUS_EARTH + h);
+   return GRAVITY_SEA * (RADIUS_EARTH / (RADIUS_EARTH + h)) * (RADIUS_EARTH / (RADIUS_EARTH + h));
 }
 
 /**
@@ -45,7 +45,7 @@ double heightAboveEarth(const Position& pos)
  */
 double directionOfPull(const Position& pos)
 {
-   return atan2(-pos.getMetersX(), -pos.getMetersY());
+   return atan2(0 - pos.getMetersX(), 0 - pos.getMetersY());
 }
 
 /**
@@ -56,9 +56,9 @@ double motionConstantChange(double x0, double dx, double t)
    return x0 + dx * t;
 }
 
-double distance(double s0, double v, double t, double a)
+double distance(double s0, double v, double a, double t)
 {
-   return s0 + v * t + .5 * a * t * t;
+   return s0 + (v * t) + ((.5 * a) * (t * t));
 }
 
 
@@ -74,20 +74,20 @@ public:
    Demo(Position ptUpperRight) :
       ptUpperRight(ptUpperRight)
    {
-      ptHubble.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptHubble.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+      //ptHubble.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
+      //ptHubble.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
 
-      ptSputnik.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptSputnik.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+      //ptSputnik.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
+      //ptSputnik.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
 
-      ptStarlink.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptStarlink.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+      //ptStarlink.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
+      //ptStarlink.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
 
-      ptCrewDragon.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptCrewDragon.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+      //ptCrewDragon.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
+      //ptCrewDragon.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
 
-      ptShip.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptShip.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+      //ptShip.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
+      //ptShip.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
 
       ptGPS.setMetersX(0.0);
       ptGPS.setMetersY(42164000.0);
@@ -97,7 +97,7 @@ public:
       ptStar.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
       ptStar.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
 
-      angleShip = 0.0;
+      //angleShip = 0.0;
       angleEarth = 0.0;
       phaseStar = 0;
    }
@@ -158,18 +158,20 @@ void callBack(const Interface* pUI, void* p)
    pDemo->angleEarth += rpf;
    pDemo->phaseStar++;
 
+   // Calculations for satellite
    double h = heightAboveEarth(pDemo->ptGPS);
-   double gh = gravityAtHeight(h);  // gravity at height
+   double a = gravityAtHeight(h);  // gravity at height
 
-   double d = directionOfPull(pDemo->ptGPS);  // direction in radians
-   double ddx = gh * sin(d);
-   double ddy = gh * cos(d);
+   double angle = directionOfPull(pDemo->ptGPS);  // direction in radians
+   double ddx = a * sin(angle);
+   double ddy = a * cos(angle);
 
    pDemo->ptGPS.setDX(motionConstantChange(pDemo->ptGPS.getDX(), ddx, tpf));
    pDemo->ptGPS.setDY(motionConstantChange(pDemo->ptGPS.getDY(), ddy, tpf));
 
-   pDemo->ptGPS.setMetersX(distance(pDemo->ptGPS.getMetersX(), pDemo->ptGPS.getDX(), tpf, ddx));
-   pDemo->ptGPS.setMetersY(distance(pDemo->ptGPS.getMetersY(), pDemo->ptGPS.getDY(), tpf, ddy));
+   // From here not working... TODO
+   pDemo->ptGPS.setMetersX(distance(pDemo->ptGPS.getMetersX(), pDemo->ptGPS.getDX(), ddx, tpf));
+   pDemo->ptGPS.setMetersY(distance(pDemo->ptGPS.getMetersY(), pDemo->ptGPS.getDY(), ddy, tpf));
 
    //
    // draw everything
